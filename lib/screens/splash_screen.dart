@@ -40,9 +40,21 @@ class _SplashScreenState extends State<SplashScreen>
 
     if (!mounted) return;
 
-    Navigator.of(context).pushReplacementNamed(
-      isLoggedIn ? HomeScreen.routeName : LoginScreen.routeName,
-    );
+    if (isLoggedIn) {
+      // ✅ Get current user & go to HomeScreen with arguments
+      final user = AuthService.instance.currentUser;
+      if (user == null) {
+        Navigator.of(context)
+            .pushReplacementNamed(LoginScreen.routeName);
+      } else {
+        Navigator.of(context).pushReplacementNamed(
+          HomeScreen.routeName,
+          arguments: user,
+        );
+      }
+    } else {
+      Navigator.of(context).pushReplacementNamed(LoginScreen.routeName);
+    }
   }
 
   @override

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../models/app_user.dart';
 import '../services/auth_service.dart';
 import 'home_screen.dart';
 
@@ -53,7 +54,20 @@ class _LoginScreenState extends State<LoginScreen> {
       return;
     }
 
-    Navigator.of(context).pushReplacementNamed(HomeScreen.routeName);
+    // ✅ Get the logged-in user from AuthService
+    final AppUser? user = AuthService.instance.currentUser;
+
+    if (user == null) {
+      setState(() {
+        _error = 'Login failed. Please try again.';
+      });
+      return;
+    }
+
+    Navigator.of(context).pushReplacementNamed(
+      HomeScreen.routeName,
+      arguments: user, // ✅ pass user to HomeScreen
+    );
   }
 
   @override
@@ -188,18 +202,18 @@ class _LoginScreenState extends State<LoginScreen> {
               ),
               const SizedBox(height: 12),
 
-              // Roll Number
+              // Login ID (works for roll / staff / simple username)
               TextFormField(
                 controller: _rollController,
                 decoration: const InputDecoration(
-                  labelText: 'Roll Number',
-                  hintText: 'e.g. CS2022STU01',
+                  labelText: 'Login ID',
+                  hintText: 'e.g. CS24B001 / Academic / CSE / ECE',
                   prefixIcon: Icon(Icons.badge_outlined),
                 ),
                 textInputAction: TextInputAction.next,
                 validator: (value) {
                   if (value == null || value.trim().isEmpty) {
-                    return 'Please enter your roll number';
+                    return 'Please enter your Login ID';
                   }
                   return null;
                 },
@@ -325,7 +339,7 @@ class _LoginScreenState extends State<LoginScreen> {
   }
 
   // -----------------------------
-  // Demo Accounts Box
+  // Demo Accounts Box (one per role)
   // -----------------------------
   Widget _buildDemoAccountsBox(BuildContext context) {
     return Container(
@@ -336,23 +350,34 @@ class _LoginScreenState extends State<LoginScreen> {
         border: Border.all(color: const Color(0xFFE5E7EB)),
       ),
       child: Column(
-        children: [
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: const [
           Text(
-            'Demo accounts',
-            style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                  fontWeight: FontWeight.w600,
-                ),
+            'Demo accounts (try these):',
+            style: TextStyle(
+              fontWeight: FontWeight.w700,
+              fontSize: 12,
+            ),
           ),
-          const SizedBox(height: 4),
+          SizedBox(height: 6),
           Text(
-            'Student (CSE): CS24B001 / student1\n'
-            'Academic Section: Academic / admin123\n'
-            'HOD (CSE): CSE / hodcse\n'
-            'Teacher (ECE): ECE / teacher4',
-            textAlign: TextAlign.center,
-            style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                  color: Colors.grey[700],
-                ),
+            'Student (CSE):\n'
+            '  ID: CS24B001    Password: student1\n\n'
+            'Teacher (ECE):\n'
+            '  ID: ECE         Password: teacher4\n\n'
+            'HOD (CSE):\n'
+            '  ID: CSE         Password: hodcse\n\n'
+            'Academic Section:\n'
+            '  ID: Academic    Password: admin123\n',
+            style: TextStyle(fontSize: 12),
+          ),
+          SizedBox(height: 4),
+          Text(
+            'Note: case-sensitive, type exactly as shown.',
+            style: TextStyle(
+              fontSize: 11,
+              color: Colors.grey,
+            ),
           ),
         ],
       ),
